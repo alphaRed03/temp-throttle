@@ -196,7 +196,8 @@ while true; do
 	get_temp # Gets the current temperature and set it to the variable TEMP.
 	if   [[ $TEMP -gt $MAX_TEMP ]]; then # Throttle if too hot.
 		throttle
-	elif [[ $TEMP -le $LOW_TEMP ]]; then # Unthrottle if cool.
+		sleep 0.5; continue # Fast react to temperature overheating.
+	elif [[ $TEMP -le $LOW_TEMP ]]; then # Unthrottle if cool.|
 		unthrottle
 	fi
 	# Sleep wait between checking temperatures.
