@@ -196,14 +196,11 @@ while true; do
 	get_temp # Gets the current temperature and set it to the variable TEMP.
 	if   [[ $TEMP -gt $MAX_TEMP ]]; then # Throttle if too hot.
 		throttle
-		sleep 0.5; continue # Fast react to temperature overheating.
-	elif [[ $TEMP -le $LOW_TEMP ]]; then # Unthrottle if cool.|
+		sleep 0.5; continue # Fast react when temperature overheating.
+	elif [[ $TEMP -le $LOW_TEMP ]]; then # Unthrottle if cool.
 		unthrottle
+		sleep 0.5 # Fast react when temperature cooling.
 	fi
 	# Sleep wait between checking temperatures.
 	sleep $INTERVAL || err_exit "Sleep wait INTERVAL must be an integer or float value: $INTERVAL"
 done
-
-
-# Implement Upthrottle difference as config variable.
-# Frequency step multiplier, to correct faster on systems with many steps.
