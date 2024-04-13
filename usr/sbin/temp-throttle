@@ -25,13 +25,14 @@ user_exit () {
 	done
 	exit
 }
-trap user_exit SIGINT SIGTERM
+trap user_exit EXIT SIGINT SIGTERM
 #trap user_exit EXIT SIGINT SIGTERM
 
 # Generic  function for printing an error and exiting.
 err_exit () {
 	echo ""
 	echo -e "Error: $@" 1>&2
+	echo -e "Errors may be reported at: http://github.com/Sepero/temp-throttle/" 1>&2
 	exit 128
 }
 
@@ -119,23 +120,25 @@ fi
 
 FREQ_LIST_LEN=$(echo $FREQ_LIST | wc -w)
 
-# This is a list of possible locations to read the current system temperature. Must add (ls) in order.
-TEMPERATURE_FILES="$(ls /sys/class/thermal/thermal_zone*/temp 2> /dev/null)"
-TEMPERATURE_FILES+=" $(ls /sys/class/hwmon/hwmon*/temp1_input 2> /dev/null)"
-TEMPERATURE_FILES+=" $(ls /sys/class/hwmon/hwmon*/device/temp1_input 2> /dev/null)"
-TEMPERATURE_FILES+=" $(ls /sys/class/hwmon/hwmon0/temp0 2> /dev/null)"
-TEMPERATURE_FILES+=" null"
-
 # Verify that we have at least one existing temperature file.
 if [ -n "$TEMP_FILE" ]; then
   [ -r "$TEMP_FILE" ] || err_exit "Temperature file cannot be read. $TEMP_FILE"
 else
+  # Temperature file location not set, therefore we autodetect.
+  # Generate a list of possible locations to read the current system temperature. Must add (ls) in order.
+  TEMPERATURE_FILES="$(ls /sys/class/thermal/thermal_zone*/temp 2> /dev/null)"
+  TEMPERATURE_FILES+=" $(ls /sys/class/hwmon/hwmon*/temp1_input 2> /dev/null)"
+  TEMPERATURE_FILES+=" $(ls /sys/class/hwmon/hwmon*/device/temp1_input 2> /dev/null)"
+  TEMPERATURE_FILES+=" $(ls /sys/class/hwmon/hwmon0/temp0 2> /dev/null)"
+  TEMPERATURE_FILES+=" null"
+
+  # Set first existing match as temperature file.
   for file in $TEMPERATURE_FILES; do
   	TEMP_FILE=$file
   	[ -f $TEMP_FILE ] && break
   done
   # If no temperature files exist, exit with error.
-  [[ $TEMP_FILE == "null" ]] && err_exit "A location for temperature reading was not found.\nPlease reference bug #7: https://github.com/Sepero/temp-throttle/issues/7"
+  [ $TEMP_FILE = "null" ] && err_exit "A location for temperature reading was not found.\nPlease reference bug #7: https://github.com/Sepero/temp-throttle/issues/7"
 fi
 
 ### END INITIALIZE GLOBAL VARIABLES.
@@ -178,7 +181,7 @@ unthrottle () {
 
 # Get the temperature from all available sources, and find the highest temp.
 get_temp () {
-	TEMP="$(cat $TEMPERATURE_FILES 2>/dev/null | xargs -n1 | sort -g -r | head -1)"
+	TEMP="$(cat $TEMP_FILE)"
 }
 
 ### END DEFINE PRIMARY FUNCTIONS.
