@@ -103,7 +103,7 @@ FREQ_MAX="/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq"
 
 # Store available cpu frequencies in a space separated string FREQ_LIST.
 if [[ -f $FREQ_FILE ]]; then
-	# If $FREQ_FILE exists, get frequencies from it.
+	# If $FREQ_FILE exists, get frequencies from it + sort highest to lowest..
 	FREQ_LIST="$(cat $FREQ_FILE | xargs -n1 | sort -urn)" || err_exit "Could not read available cpu frequencies from file $FREQ_FILE"
 elif [[ -f $FREQ_MIN && -f $FREQ_MAX ]]; then
 	# Else if $FREQ_MIN and $FREQ_MAX exist, try generate a list of frequencies between them.
@@ -115,21 +115,10 @@ fi
 FREQ_LIST_LEN=$(echo $FREQ_LIST | wc -w)
 
 # This is a list of possible locations to read the current system temperature.
-TEMPERATURE_FILES="
-/sys/class/thermal/thermal_zone0/temp
-/sys/class/thermal/thermal_zone1/temp
-/sys/class/thermal/thermal_zone2/temp
-/sys/class/hwmon/hwmon0/temp1_input
-/sys/class/hwmon/hwmon1/temp1_input
-/sys/class/hwmon/hwmon2/temp1_input
-/sys/class/hwmon/hwmon0/device/temp1_input
-/sys/class/hwmon/hwmon1/device/temp1_input
-/sys/class/hwmon/hwmon2/device/temp1_input
-/sys/class/hwmon/hwmon0/temp0
-/sys/class/hwmon/hwmon0/temp1
-/sys/class/hwmon/hwmon0/temp2
-null
-"
+TEMPERATURE_FILES="$(ls /sys/class/thermal/thermal_zone*/temp 2> /dev/null)"
+TEMPERATURE_FILES+=" $(ls /sys/class/hwmon/hwmon*/temp1_input 2> /dev/null)"
+TEMPERATURE_FILES+=" $(ls /sys/class/hwmon/hwmon*/device/temp1_input 2> /dev/null)"
+TEMPERATURE_FILES+=" $(ls /sys/class/hwmon/hwmon0/temp0 2> /dev/null)"
 
 # If temperature file from temp-throttle.conf is set, then we force using that.
 [[ -n $CONFIG_TEMPERATURE_FILE ]] && TEMPERATURE_FILES="$CONFIG_TEMPERATURE_FILE"
