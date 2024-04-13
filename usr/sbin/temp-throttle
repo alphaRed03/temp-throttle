@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# Usage: temp-throttle [-k CORE] [-f TEMP_FILE] [-i INTERVAL] [-l LOG_FILE] -t MAX_TEMP
-# Usage: temp-throttle -c CONFIG_FILE
+# Usage: temp-throttle # No arguments will default read from /etc/temp-throttle.conf
+# Usage: temp-throttle [-t MAX_TEMP] [-c CONFIG_FILE] [-k CORE] [-f TEMP_FILE] [-i INTERVAL] [-l LOG_FILE]
 
 VERSION="3.00"
 
@@ -39,7 +39,7 @@ err_exit () {
 ### START GET CONFIGURATIOM ARGUMENTS.
 
 MAX_TEMP=""    # Maximum desired CPU temperature.
-CONFIG_FILE="" # Optional configuration file.
+CONFIG_FILE="/etc/temp-throttle.conf" # Optional configuration file.
 TEMP_FILE=""   # Optional file to force read CPU temperature from.
 INTERVAL=3     # Optuinal seconds between checking CPU temperature. Default 3.
 LOG_FILE="-"   # Optional log file. Default output to standard out.
@@ -53,10 +53,17 @@ parse_config_line () { # Interprets values from a line of config file.
 }
 
 parse_config_file () {
+  [ -r "$CONFIG_FILE" ] || err_exit "Config file cannot be read: $CONFIG_FILE"
   while read -r LINE; do
     parse_config_line $(echo "$LINE" | tr '=' ' ')
   done < <(grep -oE "^[ \t]*[^=#]+=[^#]*" "$CONFIG_FILE")
 }
+
+if [ $# -eq 0 ]; then
+  parse_config_file
+elif [ $# -eq 1 ]; then # Backwards compatibility.
+  MAX_TEMP="$1"; shift
+fi
 
 # Parse command arguments.
 while [ -n "$1" ]; do
@@ -64,10 +71,7 @@ while [ -n "$1" ]; do
     -f) shift && TEMP_FILE="$1" && shift;;
     -i) shift && INTERVAL="$1"  && shift;;
     -l) shift && LOG_FILE="$1"  && shift;;
-    -c) shift && CONFIG_FILE="$1" && shift
-      [ -r "$CONFIG_FILE" ] && parse_config_file ||
-      err_exit "Config file cannot be read: $CONFIG_FILE"
-    ;;
+    -c) shift && CONFIG_FILE="$1" && shift && parse_config_file;;
     *) MAX_TEMP="$1" && shift;;
   esac
 done
