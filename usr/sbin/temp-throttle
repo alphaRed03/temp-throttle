@@ -78,7 +78,7 @@ done
 }
 
 # Verify max temperature was set.
-[[ -n $MAX_TEMP ]] ||
+[ -n $MAX_TEMP ] ||
 err_exit "MAX_TEMP not given. Please supply the maximum desired temperature in Celsius."
 echo "Maximum temperature set to: ${MAX_TEMP}C"
 
