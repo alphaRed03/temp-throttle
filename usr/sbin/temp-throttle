@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Usage: temp-throttle [-f TEMP_FILE] [-i INTERVAL] [-l LOG_FILE] MAX_TEMP
+# Usage: temp-throttle [-k CORE] [-f TEMP_FILE] [-i INTERVAL] [-l LOG_FILE] -t MAX_TEMP
 # Usage: temp-throttle -c CONFIG_FILE
 
 VERSION="3.00"
@@ -42,10 +42,11 @@ CONFIG_FILE=""
 TEMP_FILE=""
 INTERVAL=3
 LOG_FILE="-"
+CORE="0"
 
 parse_line () { # Interprets values from a line of config file.
   case "$1" in
-    MAX_TEMP|TEMP_FILE|INTERVAL|LOG_FILE) eval "$1=$2";;
+    MAX_TEMP|TEMP_FILE|INTERVAL|LOG_FILE|CORE) eval "$1=$2";;
     *) err_exit "Unknown option in config file $1";;
   esac
 }
@@ -89,7 +90,7 @@ err_exit "Maximum temperature $MAX_TEMP must be an integer."
 # The frequency will increase when low temperature is reached.
 LOW_TEMP=$((MAX_TEMP - 5))
 
-CORES=$(nproc) # Get number of CPU cores.
+CORES=$(nproc) # Get total number of CPU cores.
 echo -e "Number of CPU cores detected: $CORES\n"
 CORES=$((CORES - 1)) # Subtract 1 from $CORES for easier counting later.
 
@@ -97,9 +98,9 @@ CORES=$((CORES - 1)) # Subtract 1 from $CORES for easier counting later.
 MAX_TEMP=${MAX_TEMP}000
 LOW_TEMP=${LOW_TEMP}000
 
-FREQ_FILE="/sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies"
-FREQ_MIN="/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq"
-FREQ_MAX="/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq"
+FREQ_FILE="/sys/devices/system/cpu/cpu$CORE/cpufreq/scaling_available_frequencies"
+FREQ_MIN="/sys/devices/system/cpu/cpu$CORE/cpufreq/cpuinfo_min_freq"
+FREQ_MAX="/sys/devices/system/cpu/cpu$CORE/cpufreq/cpuinfo_max_freq"
 
 # Store available cpu frequencies in a space separated string FREQ_LIST.
 if [[ -f $FREQ_FILE ]]; then
