@@ -44,11 +44,17 @@ INTERVAL=3     # Optuinal seconds between checking CPU temperature. Default 3.
 LOG_FILE="-"   # Optional log file. Default output to standard out.
 CORE="0"       # Optional CPU Core to read frequency information from. Default 0.
 
-parse_line () { # Interprets values from a line of config file.
+parse_config_line () { # Interprets values from a line of config file.
   case "$1" in
     MAX_TEMP|TEMP_FILE|INTERVAL|LOG_FILE|CORE) eval "$1=$2";;
     *) err_exit "Unknown option in config file $1";;
   esac
+}
+
+parse_config_file () {
+  while read -r LINE; do
+    parse_config_line $(echo "$LINE" | tr '=' ' ')
+  done < <(busybox grep -oE "^[ \t]*[^=#]+=[^#]*" "$CONFIG_FILE")
 }
 
 # Parse command arguments.
@@ -57,11 +63,9 @@ while [ -n "$1" ]; do
     -f) shift && TEMP_FILE="$1" && shift;;
     -i) shift && INTERVAL="$1"  && shift;;
     -l) shift && LOG_FILE="$1"  && shift;;
-    -c)
-      shift && CONFIG_FILE="$1" && shift
-      while read -r LINE; do
-        parse_line $(echo "$LINE" | tr '=' ' ')
-      done < <(grep -oP "^[ \t]*[^=#]+=[^#]*" "$CONFIG_FILE")
+    -c) shift && CONFIG_FILE="$1" && shift
+      [ -r "$CONFIG_FILE" ] && parse_config_file ||
+      err_exit "Config file cannot be read: $CONFIG_FILE"
     ;;
     *) MAX_TEMP="$1" && shift;;
   esac
@@ -69,13 +73,13 @@ done
 
 # Begin redirecting output to log.
 [[ -n $LOG_FILE && "$LOG_FILE" != "-" ]] && {
-	echo "Further logging redirecting to logfile: $LOG_FILE"
+	echo "Further output redirecting to logfile: $LOG_FILE"
 	exec 1>> "$LOG_FILE"; exec 2>&1; echo "$INFO";
 }
 
 # Verify max temperature was set.
 [[ -n $MAX_TEMP ]] ||
-err_exit "MAX_TEMP missing from configuration file $CONFIG_FILE. Please supply the maximum desired temperature in Celsius."
+err_exit "MAX_TEMP not given. Please supply the maximum desired temperature in Celsius."
 echo "Maximum temperature set to: ${MAX_TEMP}C"
 
 # Verify temperature is an integer.
