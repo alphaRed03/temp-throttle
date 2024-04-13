@@ -32,7 +32,7 @@ trap user_exit EXIT SIGINT SIGTERM
 err_exit () {
 	echo ""
 	echo -e "Error: $@" 1>&2
-	echo -e "Errors may be reported at: http://github.com/Sepero/temp-throttle/" 1>&2
+	echo -e "Errors may be reported at: http://github.com/Sepero/temp-throttle/issues" 1>&2
 	exit 128
 }
 
