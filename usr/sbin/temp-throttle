@@ -54,7 +54,7 @@ parse_config_line () { # Interprets values from a line of config file.
 parse_config_file () {
   while read -r LINE; do
     parse_config_line $(echo "$LINE" | tr '=' ' ')
-  done < <(busybox grep -oE "^[ \t]*[^=#]+=[^#]*" "$CONFIG_FILE")
+  done < <(grep -oE "^[ \t]*[^=#]+=[^#]*" "$CONFIG_FILE")
 }
 
 # Parse command arguments.
