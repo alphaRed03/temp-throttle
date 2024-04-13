@@ -114,7 +114,7 @@ fi
 
 FREQ_LIST_LEN=$(echo $FREQ_LIST | wc -w)
 
-# This is a list of possible locations to read the current system temperature.
+# This is a list of possible locations to read the current system temperature. Must add (ls) in order.
 TEMPERATURE_FILES="$(ls /sys/class/thermal/thermal_zone*/temp 2> /dev/null)"
 TEMPERATURE_FILES+=" $(ls /sys/class/hwmon/hwmon*/temp1_input 2> /dev/null)"
 TEMPERATURE_FILES+=" $(ls /sys/class/hwmon/hwmon*/device/temp1_input 2> /dev/null)"
