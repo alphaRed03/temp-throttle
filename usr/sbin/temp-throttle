@@ -124,19 +124,16 @@ TEMPERATURE_FILES="$(ls /sys/class/thermal/thermal_zone*/temp 2> /dev/null)"
 TEMPERATURE_FILES+=" $(ls /sys/class/hwmon/hwmon*/temp1_input 2> /dev/null)"
 TEMPERATURE_FILES+=" $(ls /sys/class/hwmon/hwmon*/device/temp1_input 2> /dev/null)"
 TEMPERATURE_FILES+=" $(ls /sys/class/hwmon/hwmon0/temp0 2> /dev/null)"
-
-# If temperature file from temp-throttle.conf is set, then we force using that.
-[[ -n $CONFIG_TEMPERATURE_FILE ]] && TEMPERATURE_FILES="$CONFIG_TEMPERATURE_FILE"
+TEMPERATURE_FILES+=" null"
 
 # Verify that we have at least one existing temperature file.
 if [ -n "$TEMP_FILE" ]; then
-  [ -f "$TEMP_FILE" ] || err_exit "Temperature file was not found. $TEMP_FILE"
+  [ -r "$TEMP_FILE" ] || err_exit "Temperature file cannot be read. $TEMP_FILE"
 else
   for file in $TEMPERATURE_FILES; do
   	TEMP_FILE=$file
   	[ -f $TEMP_FILE ] && break
   done
-
   # If no temperature files exist, exit with error.
   [[ $TEMP_FILE == "null" ]] && err_exit "A location for temperature reading was not found.\nPlease reference bug #7: https://github.com/Sepero/temp-throttle/issues/7"
 fi
