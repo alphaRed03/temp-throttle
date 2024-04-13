@@ -9,5 +9,8 @@ Wolfgang Ocker <weo AT weo1 DOT de> - Patch for unspecified cpu frequencies.
 Neraste (github.com) - ARM Architecture patch for backwards reported frequencies.
 Glutanimate (github.com) - Catch script exit and reset CPU to maximum frequency.
 martin-schmidt (github.com) - Configuration file and init.d startup support.
-Piotr Findeisen (github.com/findepi) - Many valuable edits Dec 19, 2015.
+Piotr Findeisen (github.com/findepi) - Many valuable edits 2015 Dec 19
 Marc Cousin (github.com/marco44) - Sorting frequencies for ARM machines.
+
+2022 Dec 25
+github.com/Baonks81/temp- Grab temperature from device reporting cpu-thermal.

@@ -124,17 +124,27 @@ fi
 
 FREQ_LIST_LEN=$(echo $FREQ_LIST | wc -w)
 
-# Verify that we have at least one existing temperature file.
+# Use a temperature file set from configuration.
 if [ -n "$TEMP_FILE" ]; then
   [ -r "$TEMP_FILE" ] || err_exit "Temperature file cannot be read. $TEMP_FILE"
 else
-  # Temperature file location not set, therefore we autodetect.
+  # Rare case devices (SoC) need to find cpu-thermal in type.
+  for i in {0..9}; do
+    [ -f "/sys/class/thermal/thermal_zone$i/type" ] &&
+      [ "$(cat /sys/class/thermal/thermal_zone$i/type)" == "cpu-thermal" ] &&
+        TEMP_FILE="/sys/class/thermal/thermal_zone$i/temp" && break
+  done
+fi
+
+# If temperature file location not set, then we autodetect.
+if [ -z "$TEMP_FILE" ]; then
   # Generate a list of possible locations to read the current system temperature. Must add (ls) in order.
   TEMPERATURE_FILES="$(ls /sys/class/thermal/thermal_zone*/temp 2> /dev/null)"
   TEMPERATURE_FILES+=" $(ls /sys/class/hwmon/hwmon*/temp1_input 2> /dev/null)"
   TEMPERATURE_FILES+=" $(ls /sys/class/hwmon/hwmon*/device/temp1_input 2> /dev/null)"
   TEMPERATURE_FILES+=" $(ls /sys/class/hwmon/hwmon0/temp0 2> /dev/null)"
   TEMPERATURE_FILES+=" null"
+
 
   # Set first existing match as temperature file.
   for file in $TEMPERATURE_FILES; do
@@ -154,7 +164,7 @@ fi
 set_freq () {
 	# From the string FREQ_LIST, we choose the item at index CURRENT_FREQ.
 	FREQ_TO_SET=$(echo $FREQ_LIST | cut -d " " -f $CURRENT_FREQ)
-	printf "%5s Mhz\n" ${FREQ_TO_SET%???} # Print the Mhz frequency padded to 5 vharacters length.
+	printf " %5s Mhz\n" ${FREQ_TO_SET%???} # Print the Mhz frequency padded to 5 vharacters length.
 	for i in $(seq 0 $CORES); do
 		# Try to set core frequency by writing to /sys/devices.
 		{ echo $FREQ_TO_SET 2> /dev/null > /sys/devices/system/cpu/cpu$i/cpufreq/scaling_max_freq; } ||
@@ -169,7 +179,7 @@ set_freq () {
 throttle () {
 	if [[ $CURRENT_FREQ -lt $FREQ_LIST_LEN ]]; then
 		CURRENT_FREQ=$((CURRENT_FREQ + 1))
-		echo -n "$(date "+%Y-%m-%d %H:%M:%S")   throttle "
+		printf "%s %3sC %10s" "$(date '+%Y-%m-%d %H:%M:%S')" "${TEMP%???}" "throttle"
 		set_freq $CURRENT_FREQ
 	fi
 }
@@ -178,7 +188,8 @@ throttle () {
 unthrottle () {
 	if [[ $CURRENT_FREQ -ne 1 ]]; then
 		CURRENT_FREQ=$((CURRENT_FREQ - 1))
-		echo -n "$(date "+%Y-%m-%d %H:%M:%S") unthrottle "
+		printf "%s %3sC %10s" "$(date '+%Y-%m-%d %H:%M:%S')" "${TEMP%???}" "unthrottle"
+#		echo -n "$(date "+%Y-%m-%d %H:%M:%S") ${TEMP%???}C unthrottle"
 		set_freq $CURRENT_FREQ
 	fi
 }
@@ -192,6 +203,7 @@ get_temp () {
 
 # CURRENT_FREQ will keep the index of the currently used frequency in FREQ_LIST.
 CURRENT_FREQ=2
+get_temp
 echo "Initialize to max CPU frequency"
 unthrottle  # Will unthrottle CURRENT_FREQ to 1. Max Frequency.
 
