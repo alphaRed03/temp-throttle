@@ -8,7 +8,6 @@ VERSION="3.00"
 cat << EOF
 Author: Sepero 2012- sepero 111 @ gmx . com
 URL: http://github.com/Sepero/temp-throttle/
-
 EOF
 
 # Additional Links
@@ -85,7 +84,7 @@ done
 # Verify max temperature was set.
 [ -n $MAX_TEMP ] ||
 err_exit "MAX_TEMP not given. Please supply the maximum desired temperature in Celsius."
-echo "Maximum temperature set to: ${MAX_TEMP}C"
+echo "Maximum temperature set to:   ${MAX_TEMP}C"
 
 # Verify temperature is an integer.
 [[ $MAX_TEMP =~ ^-?[0-9]+$ ]] ||
@@ -100,7 +99,7 @@ err_exit "Maximum temperature $MAX_TEMP must be an integer."
 LOW_TEMP=$((MAX_TEMP - 3)) # Formerly 5 degrees less.
 
 CORES=$(nproc) # Get total number of CPU cores.
-echo -e "Number of CPU cores detected: $CORES\n"
+printf "%s %2s\n" "Number of CPU cores detected:" $CORES
 CORES=$((CORES - 1)) # Subtract 1 from $CORES for easier counting later.
 
 # Temperatures internally are calculated to the thousandth.
@@ -179,7 +178,7 @@ set_freq () {
 throttle () {
 	if [[ $CURRENT_FREQ -lt $FREQ_LIST_LEN ]]; then
 		CURRENT_FREQ=$((CURRENT_FREQ + 1))
-		printf "%s %3sC %10s" "$(date '+%Y-%m-%d %H:%M:%S')" "${TEMP%???}" "throttle"
+		printf "%s %3sC %10s" "$(date -Iseconds)" "${TEMP%???}" "throttle"
 		set_freq $CURRENT_FREQ
 	fi
 }
@@ -188,8 +187,7 @@ throttle () {
 unthrottle () {
 	if [[ $CURRENT_FREQ -ne 1 ]]; then
 		CURRENT_FREQ=$((CURRENT_FREQ - 1))
-		printf "%s %3sC %10s" "$(date '+%Y-%m-%d %H:%M:%S')" "${TEMP%???}" "unthrottle"
-#		echo -n "$(date "+%Y-%m-%d %H:%M:%S") ${TEMP%???}C unthrottle"
+		printf "%s %3sC %10s" "$(date -Iseconds)" "${TEMP%???}" "unthrottle"
 		set_freq $CURRENT_FREQ
 	fi
 }
