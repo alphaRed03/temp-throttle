@@ -47,7 +47,7 @@ CORE="0"       # Optional CPU Core to read frequency information from. Default 0
 parse_config_line () { # Interprets values from a line of config file.
   case "$1" in
     MAX_TEMP|TEMP_FILE|INTERVAL|LOG_FILE|CORE) eval "$1=$2";;
-    *) err_exit "Unknown option in config file $1";;
+    *) err_exit "Unknown option in config file $1. (Options must be all capital letters.";;
   esac
 }
 
