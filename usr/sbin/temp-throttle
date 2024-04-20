@@ -40,7 +40,7 @@ err_exit () {
 MAX_TEMP=""    # Maximum desired CPU temperature.
 CONFIG_FILE="/etc/temp-throttle.conf" # Optional configuration file.
 TEMP_FILE=""   # Optional file to force read CPU temperature from.
-INTERVAL=3     # Optuinal seconds between checking CPU temperature. Default 3.
+INTERVAL=3     # Optional seconds between checking CPU temperature. Default 3.
 LOG_FILE="-"   # Optional log file. Default output to standard out.
 CORE="0"       # Optional CPU Core to read frequency information from. Default 0.
 
@@ -89,6 +89,10 @@ echo "Maximum temperature set to:   ${MAX_TEMP}C"
 # Verify temperature is an integer.
 [[ $MAX_TEMP =~ ^-?[0-9]+$ ]] ||
 err_exit "Maximum temperature $MAX_TEMP must be an integer."
+
+# Verify interval is an integer.
+[[ $INTERVAL =~ ^-?[0-9]+$ ]] ||
+err_exit "Seconds interval for checking temperature must be an integer."
 
 ### END GET CONFIGURATIOM ARGUMENTS.
 
