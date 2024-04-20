@@ -176,20 +176,16 @@ set_freq () {
 
 # Will reduce the frequency of cpus if possible.
 throttle () {
-	if [[ $CURRENT_FREQ -lt $FREQ_LIST_LEN ]]; then
-		CURRENT_FREQ=$((CURRENT_FREQ + 1))
-		printf "%s %3sC %10s" "$(date -Iseconds)" "${TEMP%???}" "throttle"
-		set_freq $CURRENT_FREQ
-	fi
+	CURRENT_FREQ=$((CURRENT_FREQ + 1))
+	printf "%s %3sC %10s" "$(date -Iseconds)" "${TEMP%???}" "throttle"
+	set_freq $CURRENT_FREQ
 }
 
 # Will increase the frequency of cpus if possible.
 unthrottle () {
-	if [[ $CURRENT_FREQ -ne 1 ]]; then
-		CURRENT_FREQ=$((CURRENT_FREQ - 1))
-		printf "%s %3sC %10s" "$(date -Iseconds)" "${TEMP%???}" "unthrottle"
-		set_freq $CURRENT_FREQ
-	fi
+	CURRENT_FREQ=$((CURRENT_FREQ - 1))
+	printf "%s %3sC %10s" "$(date -Iseconds)" "${TEMP%???}" "unthrottle"
+	set_freq $CURRENT_FREQ
 }
 
 # Get the temperature from all available sources, and find the highest temp.
@@ -208,10 +204,12 @@ unthrottle  # Will unthrottle CURRENT_FREQ to 1. Max Frequency.
 # START MAIN LOOP.
 while true; do
 	get_temp # Gets the current temperature and set it to the variable TEMP.
-	if   [[ $TEMP -gt $MAX_TEMP ]]; then # Throttle if too hot.
+	if   [[ $TEMP -gt $MAX_TEMP && $CURRENT_FREQ -lt $FREQ_LIST_LEN ]]; then
+	  # Throttle if too hot.
 		throttle
 		sleep 0.5; continue # Fast react when temperature overheating.
-	elif [[ $TEMP -le $LOW_TEMP ]]; then # Unthrottle if cool.
+	elif [[ $TEMP -le $LOW_TEMP && $CURRENT_FREQ -ne 1 ]]; then
+	  # Unthrottle if cool.
 		unthrottle
 		sleep 0.5 # Fast react when temperature cooling.
 	fi
