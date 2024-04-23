@@ -24,6 +24,10 @@ allowed argument is an alternate configuration file.)
 For more instructions, see here:
 http://seperohacker.blogspot.com/2012/10/linux-keep-your-cpu-cool-with-frequency.html
 
+$ MONERO DONATIONS $
+44xdpakBFpEdSkxFnasyjvK46njiuiKxfMwR2sK6dwHZ5RsKi1iYbp81Dk9uQwzztHDHbTyBGVpMWAvSCZE9uvNEMfnqfbJ
+
+Other Crypto Currencies can easily be converted to Monero at https://simpleswap.io/
 
 Author: Sepero (sepero 111 @ gmx . com)
 
@@ -32,4 +36,4 @@ Links: http://seperohacker.blogspot.com/2012/10/linux-keep-your-cpu-cool-with-fr
 
 License: GNU GPL 2.0
 
-Usage: `temp-throttle [config-file]`
+Usage: `temp-throttle -c [config-file]`
