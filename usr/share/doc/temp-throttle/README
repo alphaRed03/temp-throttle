@@ -18,11 +18,13 @@ are supported. The configuration file is expected to be at
 
     sudo ./temp-throttle
 
-(Giving the temperature as a command argument is no longer supported. The only 
-allowed argument is an alternate configuration file.)
+Configuration file may be given eith the -c argument.
 
-For more instructions, see here:
+    sudo ./temp-throttle -c ./etc/temp-throttle.conf
+
+More Instructions= see the included sample configuration file. Also see here:
 http://seperohacker.blogspot.com/2012/10/linux-keep-your-cpu-cool-with-frequency.html
+
 
 $ MONERO DONATIONS $
 44xdpakBFpEdSkxFnasyjvK46njiuiKxfMwR2sK6dwHZ5RsKi1iYbp81Dk9uQwzztHDHbTyBGVpMWAvSCZE9uvNEMfnqfbJ
@@ -35,5 +37,3 @@ Links: http://github.com/Sepero/temp-throttle/
 Links: http://seperohacker.blogspot.com/2012/10/linux-keep-your-cpu-cool-with-frequency.html  
 
 License: GNU GPL 2.0
-
-Usage: `temp-throttle -c [config-file]`
