@@ -60,7 +60,7 @@ parse_config_file () {
 
 if [ $# -eq 0 ]; then
   parse_config_file
-elif [ $# -eq 1 ]; then # Backwards compatibility.
+elif [ $# -eq 1 ]; then # Accept only MAX_TEMP for backwards compatibility.
   MAX_TEMP="$1"; shift
 fi
 
@@ -73,7 +73,7 @@ while [ -n "$1" ]; do
     -l) shift && LOG_FILE="$1"  && shift;;
     -k) shift && CORE="$1"      && shift;;
     -c) shift && CONFIG_FILE="$1" && shift && parse_config_file;;
-    *) MAX_TEMP="$1" && shift;; # Catch no-flag argument for backwards compatibility.
+    *) err_exit "Unknown command line argument: $1";;
   esac
 done
 
