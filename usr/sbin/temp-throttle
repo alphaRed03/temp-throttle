@@ -86,7 +86,6 @@ done
 # Verify max temperature was set.
 [ -n $MAX_TEMP ] ||
 err_exit "MAX_TEMP not given. Please supply the maximum desired temperature in Celsius."
-echo "Maximum temperature set to:   ${MAX_TEMP}C"
 
 # Verify temperature is an integer.
 [[ $MAX_TEMP =~ ^[0-9]+$ ]] ||
@@ -95,6 +94,14 @@ err_exit "Maximum temperature $MAX_TEMP must be an integer."
 # Verify interval is an integer.
 [[ $INTERVAL =~ ^[0-9]+$ ]] ||
 err_exit "Seconds interval for checking temperature must be an integer."
+
+[[ $CORE =~ ^[0-9]+$ ]] ||
+err_exit "Seconds interval for checking temperature must be an integer."
+
+echo "Maximum temperature set to:   ${MAX_TEMP}C"
+echo -n "INTERVAL ${INTERVAL}. CORE $CORE."
+[ -n "$TEMP_FILE" ] && echo -n " TEMP_FILE=$TEMP_FILE"
+echo
 
 ### END GET CONFIGURATIOM ARGUMENTS.
 
@@ -147,12 +154,12 @@ TEMPERATURE_FILES="$TEMP_FILE"
 if [ -z "$TEMP_FILE" ]; then
   # Generate a list of possible locations to read the current system temperature. Must add (ls) in order.
   TEMPERATURE_FILES="$(ls /sys/class/thermal/thermal_zone*/temp 2> /dev/null)"
-  if [ -z "$TEMPERATURE_FILES" ] then
+  if [ -z "$TEMPERATURE_FILES" ]; then
     echo "Standard CPU temperature sensor not found. Attempting to use alternate sensors."
     TEMPERATURE_FILES="$(ls /sys/class/hwmon/hwmon*/temp*_input 2> /dev/null)"
     TEMPERATURE_FILES+=" $(ls /sys/class/hwmon/hwmon*/device/temp1_input 2> /dev/null)"
     TEMPERATURE_FILES+=" $(ls /sys/class/hwmon/hwmon*/temp* 2> /dev/null)"
-    TEMPERATUR_FILES=$TEMPERATURE_FILES # Remove any unneccessary spaces.
+    TEMPERATURE_FILES=$TEMPERATURE_FILES # Remove any unneccessary spaces.
   fi
 
   # If no temperature sensor exists, then exit with error.
