@@ -141,23 +141,22 @@ else
   done
 fi
 
+# If TEMP_FILE is set, then it is used. Otherwise this line changes nothing.
+TEMPERATURE_FILES="$TEMP_FILE"
 # If temperature file location not set, then we autodetect.
 if [ -z "$TEMP_FILE" ]; then
   # Generate a list of possible locations to read the current system temperature. Must add (ls) in order.
   TEMPERATURE_FILES="$(ls /sys/class/thermal/thermal_zone*/temp 2> /dev/null)"
-  TEMPERATURE_FILES+=" $(ls /sys/class/hwmon/hwmon*/temp1_input 2> /dev/null)"
-  TEMPERATURE_FILES+=" $(ls /sys/class/hwmon/hwmon*/device/temp1_input 2> /dev/null)"
-  TEMPERATURE_FILES+=" $(ls /sys/class/hwmon/hwmon0/temp0 2> /dev/null)"
-  TEMPERATURE_FILES+=" null"
+  if [ -z "$TEMPERATURE_FILES" ] then
+    echo "Standard CPU temperature sensor not found. Attempting to use alternate sensors."
+    TEMPERATURE_FILES="$(ls /sys/class/hwmon/hwmon*/temp*_input 2> /dev/null)"
+    TEMPERATURE_FILES+=" $(ls /sys/class/hwmon/hwmon*/device/temp1_input 2> /dev/null)"
+    TEMPERATURE_FILES+=" $(ls /sys/class/hwmon/hwmon*/temp* 2> /dev/null)"
+    TEMPERATUR_FILES=$TEMPERATURE_FILES # Remove any unneccessary spaces.
+  fi
 
-
-  # Set first existing match as temperature file.
-  for file in $TEMPERATURE_FILES; do
-  	TEMP_FILE=$file
-  	[ -f $TEMP_FILE ] && break
-  done
-  # If no temperature files exist, exit with error.
-  [ $TEMP_FILE = "null" ] && err_exit "A location for temperature reading was not found.\nPlease reference bug #7: https://github.com/Sepero/temp-throttle/issues/7"
+  # If no temperature sensor exists, then exit with error.
+  [ -z "$TEMPERATURE_FILES" ] && err_exit "A location for temperature reading was not found.\nPlease reference bug #7: https://github.com/Sepero/temp-throttle/issues/7"
 fi
 
 ### END INITIALIZE GLOBAL VARIABLES.
@@ -194,9 +193,9 @@ unthrottle () {
 	set_freq $CURRENT_FREQ
 }
 
-# Get the temperature from all available sources, and find the highest temp.
+# Get the temperature from selected sources, and find the highest temp.
 get_temp () {
-	TEMP="$(cat $TEMP_FILE)"
+	TEMP="$(cat $TEMPERATURE_FILES 2>/dev/null | xargs -n1 | sort -gr | head -1)"
 }
 
 ### END DEFINE PRIMARY FUNCTIONS.
