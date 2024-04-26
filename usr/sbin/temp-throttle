@@ -36,7 +36,7 @@ err_exit () {
 }
 
 ### START GET CONFIGURATIOM ARGUMENTS.
-
+|
 MAX_TEMP=""    # Maximum desired CPU temperature.
 CONFIG_FILE="/etc/temp-throttle.conf" # Optional configuration file.
 TEMP_FILE=""   # Optional file to force read CPU temperature from.
@@ -67,11 +67,13 @@ fi
 # Parse command arguments.
 while [ -n "$1" ]; do
   case "$1" in
+    -t) shift && MAX_TEMP="$1"  && shift;;
     -f) shift && TEMP_FILE="$1" && shift;;
     -i) shift && INTERVAL="$1"  && shift;;
     -l) shift && LOG_FILE="$1"  && shift;;
+    -k) shift && CORE="$1"      && shift;;
     -c) shift && CONFIG_FILE="$1" && shift && parse_config_file;;
-    *) MAX_TEMP="$1" && shift;;
+    *) MAX_TEMP="$1" && shift;; # Catch no-flag argument for backwards compatibility.
   esac
 done
 
@@ -87,11 +89,11 @@ err_exit "MAX_TEMP not given. Please supply the maximum desired temperature in C
 echo "Maximum temperature set to:   ${MAX_TEMP}C"
 
 # Verify temperature is an integer.
-[[ $MAX_TEMP =~ ^-?[0-9]+$ ]] ||
+[[ $MAX_TEMP =~ ^[0-9]+$ ]] ||
 err_exit "Maximum temperature $MAX_TEMP must be an integer."
 
 # Verify interval is an integer.
-[[ $INTERVAL =~ ^-?[0-9]+$ ]] ||
+[[ $INTERVAL =~ ^[0-9]+$ ]] ||
 err_exit "Seconds interval for checking temperature must be an integer."
 
 ### END GET CONFIGURATIOM ARGUMENTS.
