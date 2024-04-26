@@ -3,7 +3,7 @@
 # Usage: temp-throttle # No arguments will default read from /etc/temp-throttle.conf
 # Usage: temp-throttle [-t MAX_TEMP] [-c CONFIG_FILE] [-k CORE] [-f TEMP_FILE] [-i INTERVAL] [-l LOG_FILE]
 
-VERSION="3.00"
+VERSION="3.01"
 
 cat << EOF
 Author: Sepero 2012- sepero 111 @ gmx . com
@@ -18,6 +18,7 @@ EOF
 
 # Try to return frequency to max before exiting.
 user_exit () {
+  echo "Restoring to max CPU frequency."
 	for((i=0; i < 50; i++)); do
 		[[ CURRENT_FREQ -eq 1 ]] && break
 		unthrottle 2> /dev/null
