@@ -3,7 +3,7 @@
 # Usage: temp-throttle # No arguments will default read from /etc/temp-throttle.conf
 # Usage: temp-throttle [-t MAX_TEMP] [-c CONFIG_FILE] [-k CORE] [-f TEMP_FILE] [-i INTERVAL] [-l LOG_FILE]
 
-VERSION="3.01"
+VERSION="3.02"
 
 cat << EOF
 Author: Sepero 2012- sepero 111 @ gmx . com
@@ -155,13 +155,8 @@ TEMPERATURE_FILES="$TEMP_FILE"
 if [ -z "$TEMP_FILE" ]; then
   # Generate a list of possible locations to read the current system temperature. Must add (ls) in order.
   TEMPERATURE_FILES="$(ls /sys/class/thermal/thermal_zone*/temp 2> /dev/null)"
-  if [ -z "$TEMPERATURE_FILES" ]; then
-    echo "Standard CPU temperature sensor not found. Attempting to use alternate sensors."
-    TEMPERATURE_FILES="$(ls /sys/class/hwmon/hwmon*/temp*_input 2> /dev/null)"
-    TEMPERATURE_FILES+=" $(ls /sys/class/hwmon/hwmon*/device/temp1_input 2> /dev/null)"
-    TEMPERATURE_FILES+=" $(ls /sys/class/hwmon/hwmon*/temp* 2> /dev/null)"
-    TEMPERATURE_FILES=$TEMPERATURE_FILES # Remove any unneccessary spaces.
-  fi
+  TEMPERATURE_FILES+="$(ls /sys/class/hwmon/hwmon*/temp*_input 2> /dev/null)"
+  TEMPERATURE_FILES+="$(ls /sys/class/hwmon/hwmon*/device/temp*_input 2> /dev/null)"
 
   # If no temperature sensor exists, then exit with error.
   [ -z "$TEMPERATURE_FILES" ] && err_exit "A location for temperature reading was not found.\nPlease reference bug #7: https://github.com/Sepero/temp-throttle/issues/7"
